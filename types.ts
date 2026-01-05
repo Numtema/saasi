@@ -25,6 +25,46 @@ export interface FunnelStep {
   fields?: ('name' | 'email' | 'phone')[];
 }
 
+export interface FunnelSettings {
+  scoring: {
+    enabled: boolean;
+    maxScore: number;
+    showSegment: boolean;
+    segments: { id: string; label: string; min: number; max: number }[];
+  };
+  integrations: {
+    webhookUrl: string;
+    calendarUrl: string;
+  };
+  pixels: {
+    facebook: string;
+    google: string;
+    tiktok: string;
+  };
+  multiLanguage: {
+    enabled: boolean;
+    languages: string[];
+  };
+  whatsapp: {
+    enabled: boolean;
+    number: string;
+    message: string;
+  };
+  redirection: {
+    type: 'url' | 'whatsapp' | 'none';
+    value: string;
+    whatsappNumber?: string;
+  };
+  branding: {
+    logoUrl: string;
+  };
+  socials: {
+    facebook: string;
+    instagram: string;
+    linkedin: string;
+  };
+}
+
 export interface Funnel {
   id: string;
   name: string;
@@ -34,6 +74,7 @@ export interface Funnel {
   views: number;
   conversions: number;
   createdAt: string;
+  settings?: FunnelSettings;
 }
 
 export interface Lead {
