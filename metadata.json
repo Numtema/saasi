@@ -1,0 +1,8 @@
+{
+  "name": "Nümtema Face - AI Video Funnel Dashboard",
+  "description": "A high-fidelity AI-powered dashboard for creating interactive video funnels using the Lead Generation Machine methodology and Gemini AI.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
