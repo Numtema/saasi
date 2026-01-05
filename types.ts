@@ -14,6 +14,12 @@ export interface MediaConfig {
   url: string;
 }
 
+export interface QuestionOption {
+  id: string;
+  text: string;
+  score: number;
+}
+
 export interface FunnelStep {
   id: string;
   type: StepType;
@@ -21,8 +27,15 @@ export interface FunnelStep {
   description: string;
   media: MediaConfig;
   buttonText: string;
-  options?: { id: string; text: string; score: number }[];
+  options?: QuestionOption[];
   fields?: ('name' | 'email' | 'phone')[];
+}
+
+export interface ScoringSegment {
+  id: string;
+  label: string;
+  min: number;
+  max: number;
 }
 
 export interface FunnelSettings {
@@ -30,7 +43,7 @@ export interface FunnelSettings {
     enabled: boolean;
     maxScore: number;
     showSegment: boolean;
-    segments: { id: string; label: string; min: number; max: number }[];
+    segments: ScoringSegment[];
   };
   integrations: {
     webhookUrl: string;
@@ -53,7 +66,6 @@ export interface FunnelSettings {
   redirection: {
     type: 'url' | 'whatsapp' | 'none';
     value: string;
-    whatsappNumber?: string;
   };
   branding: {
     logoUrl: string;
