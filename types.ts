@@ -29,6 +29,7 @@ export interface FunnelStep {
   buttonText: string;
   options?: QuestionOption[];
   fields?: ('name' | 'email' | 'phone')[];
+  calendarUrl?: string;
 }
 
 export interface ScoringSegment {

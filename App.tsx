@@ -8,6 +8,7 @@ import FunnelsView from './components/FunnelsView';
 import FunnelEditor from './components/FunnelEditor';
 import LeadsView from './components/LeadsView';
 import AnalyticsView from './components/AnalyticsView';
+import FunnelAnalytics from './components/FunnelAnalytics';
 import LGMWizard from './components/LGMWizard';
 import VideoGenView from './components/VideoGenView';
 import TemplatesView from './components/TemplatesView';
@@ -20,6 +21,7 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [editingFunnel, setEditingFunnel] = useState<Funnel | null>(null);
+  const [viewingAnalyticsId, setViewingAnalyticsId] = useState<string | null>(null);
 
   useEffect(() => {
     const theme = isDarkMode ? THEMES.dark : THEMES.light;
@@ -48,7 +50,16 @@ const App: React.FC = () => {
     setActiveTab('editor');
   };
 
+  const handleViewAnalytics = (id: string) => {
+    setViewingAnalyticsId(id);
+    setActiveTab('funnel-analytics');
+  };
+
   const renderContent = () => {
+    if (activeTab === 'funnel-analytics' && viewingAnalyticsId) {
+      return <FunnelAnalytics funnelId={viewingAnalyticsId} theme={currentTheme} onBack={() => setActiveTab('funnels')} />;
+    }
+
     switch (activeTab) {
       case 'dashboard': return <DashboardView theme={currentTheme} onNavigate={setActiveTab} />;
       case 'funnels': return <FunnelsView theme={currentTheme} onEdit={handleEditFunnel} />;
