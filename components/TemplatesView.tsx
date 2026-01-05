@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Layers, Zap, GraduationCap, ShoppingBag, Rocket, ArrowRight, Copy } from 'lucide-react';
-import { AppTheme, Funnel, StepType } from '../types';
+import { AppTheme, Funnel, StepType, FunnelSettings } from '../types';
 import { storageService } from '../services/storageService';
 
 interface TemplatesViewProps {
@@ -41,6 +41,7 @@ const TEMPLATES = [
 
 const TemplatesView: React.FC<TemplatesViewProps> = ({ theme, onUseTemplate }) => {
   const handleSelectTemplate = async (template: typeof TEMPLATES[0]) => {
+    // Add default settings to satisfy the Funnel interface requirements
     const newFunnel: Funnel = {
       id: Math.random().toString(36).substr(2, 9),
       name: `${template.name} (Copie)`,
@@ -58,7 +59,45 @@ const TemplatesView: React.FC<TemplatesViewProps> = ({ theme, onUseTemplate }) =
           buttonText: 'Commencer l\'expérience',
           media: { type: 'none', url: '' }
         }
-      ]
+      ],
+      settings: {
+        scoring: {
+          enabled: false,
+          maxScore: 100,
+          showSegment: false,
+          segments: []
+        },
+        integrations: {
+          webhookUrl: '',
+          calendarUrl: ''
+        },
+        pixels: {
+          facebook: '',
+          google: '',
+          tiktok: ''
+        },
+        multiLanguage: {
+          enabled: false,
+          languages: ['fr']
+        },
+        whatsapp: {
+          enabled: false,
+          number: '',
+          message: ''
+        },
+        redirection: {
+          type: 'none',
+          value: ''
+        },
+        branding: {
+          logoUrl: ''
+        },
+        socials: {
+          facebook: '',
+          instagram: '',
+          linkedin: ''
+        }
+      }
     };
     
     const saved = await storageService.saveFunnel(newFunnel);

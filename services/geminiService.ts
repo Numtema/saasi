@@ -3,13 +3,13 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { StepType } from "../types";
 
 export const geminiService = {
-  // Génération de stratégie profonde avec Thinking
+  // Génération de contenu d'étape
   async generateStrategy(prompt: string) {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
       config: {
-        thinkingConfig: { thinkingBudget: 32768 }, // Budget max pour une stratégie marketing complexe
+        thinkingConfig: { thinkingBudget: 32768 },
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
@@ -32,34 +32,63 @@ export const geminiService = {
           }
         }
       },
-      contents: `Crée une stratégie "Lead Generation Machine" complète. Analyse en profondeur les points de douleur psychologiques et génère 9 étapes (Attract -> Convert). Produit uniquement du JSON. Contexte : ${prompt}`
+      contents: `Crée une stratégie "Lead Generation Machine" complète. Analyse en profondeur les points de douleur et génère 9 étapes (Attract -> Convert). Produit uniquement du JSON. Contexte : ${prompt}`
     });
-
     return JSON.parse(response.text || '{}');
   },
 
-  // Veille marketing temps réel avec Search Grounding
-  async getMarketTrends() {
+  // Génération d'image avec Gemini 2.5 Flash Image
+  async generateImage(prompt: string): Promise<string> {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      config: {
-        tools: [{ googleSearch: {} }]
-      },
-      contents: "Quelles sont les 3 dernières tendances majeures en vidéo marketing et funnel de vente automatisé pour 2024-2025 ?"
+      model: 'gemini-2.5-flash-image',
+      contents: [{ text: `Generate a high-quality professional marketing image for: ${prompt}. Aspect ratio 16:9.` }],
+      config: { imageConfig: { aspectRatio: "16:9" } }
+    });
+    
+    for (const part of response.candidates[0].content.parts) {
+      if (part.inlineData) {
+        return `data:image/png;base64,${part.inlineData.data}`;
+      }
+    }
+    throw new Error("No image generated");
+  },
+
+  // Génération de vidéo avec Veo
+  async generateVideo(prompt: string, onStatus: (msg: string) => void): Promise<string> {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    
+    // Vérifier la clé API Studio d'abord
+    // @ts-ignore
+    const hasKey = await window.aistudio.hasSelectedApiKey();
+    if (!hasKey) {
+      // @ts-ignore
+      await window.aistudio.openSelectKey();
+    }
+
+    onStatus("Initialisation de Veo...");
+    let operation = await ai.models.generateVideos({
+      model: 'veo-3.1-fast-generate-preview',
+      prompt: `Professional business marketing cinematic clip, 4k, smooth lighting, ${prompt}`,
+      config: { numberOfVideos: 1, resolution: '720p', aspectRatio: '16:9' }
     });
 
-    return {
-      text: response.text,
-      sources: response.candidates?.[0]?.groundingMetadata?.groundingChunks || []
-    };
+    while (!operation.done) {
+      onStatus("Rendu des pixels par l'IA Veo (cela peut prendre 1-2 min)...");
+      await new Promise(resolve => setTimeout(resolve, 8000));
+      operation = await ai.operations.getVideosOperation({ operation });
+    }
+
+    const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
+    const finalUrl = `${downloadLink}&key=${process.env.API_KEY}`;
+    return finalUrl;
   },
 
   async enhanceCopy(text: string) {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `Améliore ce texte marketing pour le rendre plus percutant, émotionnel et orienté conversion : "${text}"`
+      contents: `Améliore ce texte marketing pour le rendre plus percutant : "${text}"`
     });
     return response.text;
   }

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Sparkles, ArrowRight, Loader2, Wand2, Target, CheckCircle2 } from 'lucide-react';
-import { AppTheme } from '../types';
+import { AppTheme, Funnel, StepType, FunnelSettings } from '../types';
 import { geminiService } from '../services/geminiService';
 import { storageService } from '../services/storageService';
 
@@ -9,6 +9,26 @@ interface LGMWizardProps {
   theme: AppTheme;
   onComplete: () => void;
 }
+
+const DEFAULT_SETTINGS: FunnelSettings = {
+  scoring: {
+    enabled: true,
+    maxScore: 100,
+    showSegment: true,
+    segments: [
+      { id: '1', label: 'Froid', min: 0, max: 30 },
+      { id: '2', label: 'Tiède', min: 31, max: 70 },
+      { id: '3', label: 'Chaud', min: 71, max: 100 }
+    ]
+  },
+  integrations: { webhookUrl: '', calendarUrl: '' },
+  pixels: { facebook: '', google: '', tiktok: '' },
+  multiLanguage: { enabled: false, languages: ['fr'] },
+  whatsapp: { enabled: false, number: '', message: '' },
+  redirection: { type: 'none', value: '' },
+  branding: { logoUrl: '' },
+  socials: { facebook: '', instagram: '', linkedin: '' }
+};
 
 const LGMWizard: React.FC<LGMWizardProps> = ({ theme, onComplete }) => {
   const [step, setStep] = useState(1);
@@ -19,18 +39,19 @@ const LGMWizard: React.FC<LGMWizardProps> = ({ theme, onComplete }) => {
     setIsGenerating(true);
     try {
       const result = await geminiService.generateStrategy(prompt);
-      const newFunnel = {
+      const newFunnel: Funnel = {
         id: Math.random().toString(36).substr(2, 9),
         name: result.name || "Nouveau Funnel AI",
         description: result.description || prompt,
         steps: result.steps || [],
-        status: 'draft' as const,
+        status: 'draft',
         views: 0,
         conversions: 0,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        settings: DEFAULT_SETTINGS
       };
       
-      storageService.saveFunnel(newFunnel);
+      await storageService.saveFunnel(newFunnel);
       setStep(3);
     } catch (err) {
       console.error(err);
@@ -60,7 +81,7 @@ const LGMWizard: React.FC<LGMWizardProps> = ({ theme, onComplete }) => {
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="Ex: Je vends un programme de coaching pour entrepreneurs..."
-              className="w-full h-40 p-4 border rounded-xl focus:ring-2 focus:ring-[var(--primary)] focus:outline-none transition-all resize-none text-[15px]"
+              className="w-full h-40 p-4 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--primary)] focus:outline-none transition-all resize-none text-[15px]"
             />
             <button onClick={() => setStep(2)} disabled={!prompt} className="w-full mt-6 py-4 rounded-xl bg-[var(--primary)] text-white font-bold text-lg flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-50 transition-all shadow-lg">
               Étape suivante <ArrowRight size={20} />
@@ -75,11 +96,11 @@ const LGMWizard: React.FC<LGMWizardProps> = ({ theme, onComplete }) => {
             <h2 className="text-3xl font-bold">Analyse Stratégique</h2>
             <p className="text-[var(--text-body)]">Analyse en cours via Gemini Pro (Thinking Mode activé)...</p>
           </div>
-          <div className="bg-white p-10 rounded-[32px] shadow-sm border text-center space-y-8">
+          <div className="bg-white p-10 rounded-[32px] shadow-sm border border-gray-100 text-center space-y-8">
             <div className="flex justify-center">
               {isGenerating ? (
                 <div className="relative">
-                  <div className="w-24 h-24 border-4 border-t-[var(--primary)] rounded-full animate-spin"></div>
+                  <div className="w-24 h-24 border-4 border-gray-100 border-t-[var(--primary)] rounded-full animate-spin"></div>
                   <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[var(--primary)]" size={32} />
                 </div>
               ) : (

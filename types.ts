@@ -86,7 +86,7 @@ export interface Funnel {
   views: number;
   conversions: number;
   createdAt: string;
-  settings?: FunnelSettings;
+  settings: FunnelSettings;
 }
 
 export interface Lead {
